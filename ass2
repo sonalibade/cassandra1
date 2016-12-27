@@ -1,0 +1,89 @@
+exam@exam-ThinkCentre-M71e:~$ cassandra/bin/cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 2.1.11 | CQL spec 3.2.1 | Native protocol v3]
+Use HELP for help.
+cqlsh> create keyspace mykeyspace
+   ... with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+cqlsh> use mykeyspace
+   ... ;
+cqlsh:mykeyspace> create table student (
+              ... roll int primary key,
+              ... fname text,
+              ... lname text
+              ... );
+cqlsh:mykeyspace> insert into student (roll, fname, lname) values (1, 'jack', 'castle');
+cqlsh:mykeyspace> insert into student (roll, fname, lname) values (2, 'james', 'doe');
+cqlsh:mykeyspace> insert into student (roll, fname, lname) values (3, 'john', 'smith');
+cqlsh:mykeyspace> select * from student;
+
+ roll | fname | lname
+------+-------+--------
+    1 |  jack | castle
+    2 | james |    doe
+    3 |  john |  smith
+
+(3 rows)
+cqlsh:mykeyspace> create keyspace studentdata 
+              ... with replication = { 'class' : 'SimpleStratergy','replication_factor' : 1 };
+ConfigurationException: <ErrorMessage code=2300 [Query invalid because of configuration issue] message="Unable to find replication strategy class 'org.apache.cassandra.locator.SimpleStratergy'">
+cqlsh:mykeyspace> create keyspace studentdata  with replication = { 'class' : 'SimpleStrategy','replication_factor' : 1 };
+cqlsh:mykeyspace> use studentdata;
+cqlsh:studentdata> CREATE TABLE student (
+               ... studentid int PRIMARY KEY,
+               ... name text,
+               ... age int,
+               ... hobby text,
+               ... contact set<text>,
+               ... email list<text>,
+               ... address map<text,text>
+               ... );
+cqlsh:studentdata> CREATE TABLE enroll (
+               ... enrollid int,
+               ... studentid int,
+               ... testmark map<text,int>,
+               ... primary key (enrollid,studentid)
+               ... );
+cqlsh:studentdata> insert into student (studentid,name,age,hobby,contact,email,address) values
+               ... (1,'ravi',23,'reading',{'8484801139'},['ravi@gmail.com'],{'locality':'dighi','city':'pune','state':'maharashtra'});
+cqlsh:studentdata> insert into student (studentid,name,age,hobby,contact,email,address) values (2,'xyz',26,'reading',{'8445701139'},['xyz@gmail.com'],{'locality':'wadi','city':'pune','state':'maharashtra'});
+cqlsh:studentdata> show student;
+Improper show command.
+cqlsh:studentdata> select * from student;
+
+ studentid | address                                                       | age | contact        | email              | hobby   | name
+-----------+---------------------------------------------------------------+-----+----------------+--------------------+---------+------
+         1 | {'city': 'pune', 'locality': 'dighi', 'state': 'maharashtra'} |  23 | {'8484801139'} | ['ravi@gmail.com'] | reading | ravi
+         2 |  {'city': 'pune', 'locality': 'wadi', 'state': 'maharashtra'} |  26 | {'8445701139'} |  ['xyz@gmail.com'] | reading |  xyz
+
+(2 rows)
+cqlsh:studentdata> alter table student add surname text;
+cqlsh:studentdata> alter table student drop address;
+cqlsh:studentdata> select * from student;
+
+ studentid | age | contact        | email              | hobby   | name | surname
+-----------+-----+----------------+--------------------+---------+------+---------
+         1 |  23 | {'8484801139'} | ['ravi@gmail.com'] | reading | ravi |    null
+         2 |  26 | {'8445701139'} |  ['xyz@gmail.com'] | reading |  xyz |    null
+
+(2 rows)
+cqlsh:studentdata> create index stud_age on student(age);
+cqlsh:studentdata> select * from student where age=23;
+
+ studentid | age | contact        | email              | hobby   | name | surname
+-----------+-----+----------------+--------------------+---------+------+---------
+         1 |  23 | {'8484801139'} | ['ravi@gmail.com'] | reading | ravi |    null
+
+(1 rows)
+cqlsh:studentdata> drop index stud_age;
+cqlsh:studentdata> truncate student;
+cqlsh:studentdata> select * from student;
+
+ studentid | age | contact | email | hobby | name | surname
+-----------+-----+---------+-------+-------+------+---------
+
+(0 rows)
+cqlsh:studentdata> drop table student;
+cqlsh:studentdata> select * from student;
+InvalidRequest: code=2200 [Invalid query] message="unconfigured columnfamily student"
+cqlsh:studentdata> 
+
